@@ -1,0 +1,73 @@
+[project]
+name = "factory-scheduler"
+version = "0.1.0"
+description = "Job-shop scheduling digital twin (SimPy) benchmarking PPO against dispatching rules and OR-Tools CP-SAT"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["scheduling", "reinforcement-learning", "ppo", "simpy", "or-tools", "digital-twin"]
+authors = [
+    { name = "nithya-prakash", email = "nithyaprakash1209@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "gymnasium>=1.4.0",
+    "matplotlib>=3.11.2",
+    "mlflow>=3.17.1",
+    "numpy>=2.5.4",
+    "ortools>=9.15.6755",
+    "pandas>=3.0.6",
+    "plotly>=7.1.0",
+    "pyyaml>=6.0.3",
+    "sb3-contrib>=2.9.0",
+    "scipy>=1.18.1",
+    "simpy>=4.1.2",
+    "stable-baselines3>=2.9.0",
+    "torch>=2.4",
+    "streamlit>=1.66.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.170.0",
+    "mypy>=2.4.0",
+    "pandas-stubs>=3.0.5.260914",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.1",
+    "types-pyyaml>=6.0.12.20260906",
+    "websockets>=17.2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["tests", "src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["B905", "B007"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[project.scripts]
+factory-scheduler = "factory_scheduler.cli:main"
+
+# Linux (Docker/CI) gets the small CPU-only torch wheel instead of the multi-GB CUDA build.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]

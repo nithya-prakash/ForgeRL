@@ -1,0 +1,196 @@
+{
+  "scenarios": {
+    "stable": {
+      "name": "stable",
+      "machine_types": {
+        "cut": 2,
+        "mill": 2,
+        "assemble": 1
+      },
+      "speed_spread": 0.0,
+      "flex_prob": 0.0,
+      "n_jobs": 20,
+      "ops_range": [
+        2,
+        4
+      ],
+      "proc_range": [
+        5,
+        25
+      ],
+      "n_families": 3,
+      "setup_time": 4,
+      "arrival": "static",
+      "arrival_rate": 0.0,
+      "due_tightness": 3.0,
+      "priorities": [
+        1,
+        1,
+        2,
+        3
+      ],
+      "mtbf": 0,
+      "mttr": 0,
+      "horizon": 5000,
+      "tardiness_cost": 1.0
+    },
+    "breakdowns": {
+      "name": "breakdowns",
+      "machine_types": {
+        "cut": 2,
+        "mill": 2,
+        "assemble": 1
+      },
+      "speed_spread": 0.0,
+      "flex_prob": 0.0,
+      "n_jobs": 20,
+      "ops_range": [
+        2,
+        4
+      ],
+      "proc_range": [
+        5,
+        25
+      ],
+      "n_families": 3,
+      "setup_time": 4,
+      "arrival": "static",
+      "arrival_rate": 0.0,
+      "due_tightness": 3.0,
+      "priorities": [
+        1,
+        1,
+        2,
+        3
+      ],
+      "mtbf": 120,
+      "mttr": 15,
+      "horizon": 5000,
+      "tardiness_cost": 1.0
+    },
+    "dynamic_arrivals": {
+      "name": "dynamic_arrivals",
+      "machine_types": {
+        "cut": 2,
+        "mill": 2,
+        "assemble": 1
+      },
+      "speed_spread": 0.0,
+      "flex_prob": 0.0,
+      "n_jobs": 30,
+      "ops_range": [
+        2,
+        4
+      ],
+      "proc_range": [
+        5,
+        25
+      ],
+      "n_families": 3,
+      "setup_time": 4,
+      "arrival": "poisson",
+      "arrival_rate": 0.12,
+      "due_tightness": 3.0,
+      "priorities": [
+        1,
+        1,
+        2,
+        3
+      ],
+      "mtbf": 0,
+      "mttr": 0,
+      "horizon": 5000,
+      "tardiness_cost": 1.0
+    },
+    "hetero_full": {
+      "name": "hetero_full",
+      "machine_types": {
+        "cut": 2,
+        "mill": 2,
+        "assemble": 1
+      },
+      "speed_spread": 0.3,
+      "flex_prob": 0.25,
+      "n_jobs": 30,
+      "ops_range": [
+        2,
+        4
+      ],
+      "proc_range": [
+        5,
+        25
+      ],
+      "n_families": 3,
+      "setup_time": 4,
+      "arrival": "poisson",
+      "arrival_rate": 0.12,
+      "due_tightness": 3.0,
+      "priorities": [
+        1,
+        1,
+        2,
+        3
+      ],
+      "mtbf": 120,
+      "mttr": 15,
+      "horizon": 5000,
+      "tardiness_cost": 1.0
+    },
+    "stress": {
+      "name": "stress",
+      "machine_types": {
+        "cut": 2,
+        "mill": 2,
+        "assemble": 1
+      },
+      "speed_spread": 0.3,
+      "flex_prob": 0.25,
+      "n_jobs": 40,
+      "ops_range": [
+        2,
+        4
+      ],
+      "proc_range": [
+        5,
+        25
+      ],
+      "n_families": 3,
+      "setup_time": 4,
+      "arrival": "poisson",
+      "arrival_rate": 0.2,
+      "due_tightness": 1.6,
+      "priorities": [
+        1,
+        1,
+        2,
+        3
+      ],
+      "mtbf": 60,
+      "mttr": 20,
+      "horizon": 5000,
+      "tardiness_cost": 1.0
+    }
+  },
+  "seeds": [
+    200000,
+    200001,
+    200002,
+    200003,
+    200004,
+    200005,
+    200006,
+    200007
+  ],
+  "model": "artifacts/models/ppo_1m_tardy/best.zip",
+  "policies": [
+    "ATC",
+    "CPSAT-RH",
+    "CR",
+    "EDD",
+    "FIFO",
+    "LSL",
+    "PPO",
+    "SPT"
+  ],
+  "seconds": 231.59197066600063
+}

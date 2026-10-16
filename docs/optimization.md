@@ -1,0 +1,5 @@
+# CP-SAT
+
+* `solve_static` is **offline**: all jobs including future releases known; model = optional intervals per eligible machine, `NoOverlap` per machine, precedence, release times, objective makespan or priority-weighted tardiness. It requires instances without breakdowns and setups (`static_variant`); setups/breakdowns are not modelled. Single worker + fixed seed for determinism. Status OPTIMAL/FEASIBLE/INFEASIBLE/UNKNOWN, bound, gap and runtime are recorded. Its schedules are re-checked by the independent validator.
+* It is a reference/lower bound, **not** a fair online competitor.
+* `RollingCPSAT` is the online version: at each decision it re-solves over released jobs only (running ops fixed by projected finish, down machines assumed repaired in 10 min), objective weighted tardiness, then starts the op the plan starts first. Setups and breakdowns are executed by the simulator but not planned. Time limit per solve is tiny (0.1 s in the reported run), so it is a weak planner; do not read it as CP-SAT's best possible online performance.

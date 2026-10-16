@@ -1,0 +1,50 @@
+# Synthetic scenarios. Times are integer minutes. No external dataset is used.
+defaults: &d
+  machine_types: {cut: 2, mill: 2, assemble: 1}   # type -> number of machines
+  speed_spread: 0.0          # +-fraction machine speed heterogeneity within a type
+  flex_prob: 0.0             # prob. an op is also eligible on another type (at 1.4x time)
+  n_jobs: 20
+  ops_range: [2, 4]
+  proc_range: [5, 25]
+  n_families: 3
+  setup_time: 4
+  arrival: static            # static | poisson
+  arrival_rate: 0.0          # jobs/min when poisson
+  due_tightness: 3.0         # due = release + tightness * sum(mean proc of ops)
+  priorities: [1, 1, 2, 3]
+  mtbf: 0                    # mean up time between failures (0 = no breakdowns)
+  mttr: 0
+  horizon: 5000
+  tardiness_cost: 1.0
+
+scenarios:
+  stable:
+    <<: *d
+  breakdowns:
+    <<: *d
+    mtbf: 120
+    mttr: 15
+  dynamic_arrivals:
+    <<: *d
+    n_jobs: 30
+    arrival: poisson
+    arrival_rate: 0.12
+  hetero_full:
+    <<: *d
+    n_jobs: 30
+    speed_spread: 0.3
+    flex_prob: 0.25
+    arrival: poisson
+    arrival_rate: 0.12
+    mtbf: 120
+    mttr: 15
+  stress:
+    <<: *d
+    n_jobs: 40
+    speed_spread: 0.3
+    flex_prob: 0.25
+    arrival: poisson
+    arrival_rate: 0.2
+    due_tightness: 1.6
+    mtbf: 60
+    mttr: 20

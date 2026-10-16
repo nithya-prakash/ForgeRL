@@ -1,0 +1,10 @@
+services:
+  dashboard:
+    build: .
+    ports: ["8501:8501"]
+    volumes: ["./data:/app/data", "./artifacts:/app/artifacts"]
+  mlflow:
+    build: .
+    command: mlflow ui --host 0.0.0.0 --backend-store-uri sqlite:////app/mlflow.db
+    ports: ["5000:5000"]
+    volumes: ["./mlflow.db:/app/mlflow.db"]

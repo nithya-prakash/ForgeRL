@@ -1,0 +1,3 @@
+ATC val mean 3884.2 EDD 5480.8
+BC (clone of ATC): seeds [3992, 4209, 4051] mean 4084 (+5.1% vs ATC); paired diff +200 [+24, +376] over 50 instances; Wilcoxon p=0.077
+PPO fine-tuned from BC: seeds [4421, 4487, 4643] mean 4517 (+16.3% vs ATC); paired diff +633 [+249, +1017] over 50 instances; Wilcoxon p=4.3e-09

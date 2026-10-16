@@ -1,0 +1,42 @@
+{
+  "stable": {
+    "mean_candidates": 5.90669014084507,
+    "max_candidates": 38,
+    "frac_decisions_over_slots": 0.028169014084507043,
+    "frac_atc_choice_visible": 1.0,
+    "mean_decisions_per_episode": 56.8,
+    "frac_single_candidate": 0.13556338028169015
+  },
+  "breakdowns": {
+    "mean_candidates": 5.774647887323944,
+    "max_candidates": 38,
+    "frac_decisions_over_slots": 0.028169014084507043,
+    "frac_atc_choice_visible": 1.0,
+    "mean_decisions_per_episode": 56.8,
+    "frac_single_candidate": 0.13732394366197184
+  },
+  "dynamic_arrivals": {
+    "mean_candidates": 3.8854625550660793,
+    "max_candidates": 18,
+    "frac_decisions_over_slots": 0.0,
+    "frac_atc_choice_visible": 1.0,
+    "mean_decisions_per_episode": 90.8,
+    "frac_single_candidate": 0.22356828193832598
+  },
+  "hetero_full": {
+    "mean_candidates": 3.661469933184855,
+    "max_candidates": 16,
+    "frac_decisions_over_slots": 0.0,
+    "frac_atc_choice_visible": 1.0,
+    "mean_decisions_per_episode": 89.8,
+    "frac_single_candidate": 0.2572383073496659
+  },
+  "stress": {
+    "mean_candidates": 6.599332220367279,
+    "max_candidates": 26,
+    "frac_decisions_over_slots": 0.0008347245409015025,
+    "frac_atc_choice_visible": 1.0,
+    "mean_decisions_per_episode": 119.8,
+    "frac_single_candidate": 0.11853088480801335
+  }
+}

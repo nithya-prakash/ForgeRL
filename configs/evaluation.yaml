@@ -1,0 +1,9 @@
+split: test            # seeds 200000.. (never used in training or checkpoint selection)
+n_seeds: 20
+scenarios: [stable, breakdowns, dynamic_arrivals, hetero_full, stress]
+heuristics: [FIFO, SPT, EDD, CR, LSL, ATC]
+cpsat:
+  n_seeds: 10
+  n_jobs: 10            # small instances so optimality can be proven / bounded
+  time_limit: 20
+  rolling_time_limit: 0.3

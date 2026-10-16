@@ -1,0 +1,20 @@
+# CPU-friendly default (~10 min on a laptop). Raise total_timesteps for more reliable results.
+run_name: ppo_default
+seed: 0
+total_timesteps: 200000
+n_envs: 4
+train_scenarios: [stable, breakdowns, dynamic_arrivals, hetero_full, stress]
+n_train_seeds: 200          # train split seeds 0..199 (disjoint from val/test)
+n_val_seeds: 4              # per scenario, used for checkpoint selection only
+eval_freq: 20000            # timesteps between validation evaluations
+reward: {flow_weight: 1.0, tardiness_weight: 1.0, reward_scale: 500.0}
+ppo:
+  learning_rate: 0.0003
+  n_steps: 512
+  batch_size: 128
+  n_epochs: 10
+  gamma: 0.995
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.01
+  net_arch: [128, 128]
