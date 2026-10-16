@@ -22,7 +22,7 @@ Simulator + validator, 5 scenarios, 6 rules, static/rolling CP-SAT, Gym env with
 
 ## Not verified
 * **Docker (now verified)**: the first build failed pulling `ghcr.io` (timeout); the second failed with a DNS error fetching the torch CPU wheel from `download.pytorch.org` inside the Docker VM; the third succeeded (82 s final stage after a slow torch download). Image 2.29 GB, `torch 2.14.1+cpu`, container health endpoint 200, AppTest of the Policy Comparison page inside the container: no exception, 5 tables. `docker compose up -d dashboard` -> health 200; `docker compose config` valid. The network flakiness is environmental, not a code fault, but it means the build is sometimes slow or needs a retry.
-* **GitHub Actions**: workflow YAML parses; it has never run. The CPU-torch lock change is untested on a Linux runner.
+* **GitHub Actions**: first run on `main` (commit e0d0891) passed all steps on ubuntu-latest, including `uv lock --check`, `uv sync --frozen` with the CPU torch wheel, Ruff, mypy, 43 tests and the CLI smoke step.
 * `make demo`: not run.
 * Release-prep pass: Dockerfile reordered (deps layer before source), rebuilt OK (2.29 GB); `docker compose up` -> dashboard and MLflow both health 200; `make docker` added (touches `mlflow.db` so Docker does not create a directory). CI gained `uv lock --check` and a CLI smoke step (not yet executed on GitHub).
 

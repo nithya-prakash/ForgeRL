@@ -65,7 +65,7 @@ uv run factory-scheduler sweep load --n-seeds 10                 # also: breakdo
 Why PPO lost, with evidence and the stopping rule: [docs/rl_failure_analysis.md](docs/rl_failure_analysis.md).
 
 ## Limitations
-- Not run on GitHub: the CI workflow has never executed, so the badge shows no status until the first run.
+- CI covers lock check, Ruff, mypy, the 43 tests and a CLI smoke run; it does not run PPO training or the benchmark.
 - Not measured: PPO on the breakdown and arrival sweeps (load sweep only); more than one PPO seed per reward setting.
 - Not implemented: idling or lookahead actions (dispatching is non-delay), setups and breakdowns inside CP-SAT, validation against real factory data.
 - Model weights and the MLflow DB are not committed; retraining is needed to reproduce the PPO row, and results can differ slightly across machines.
