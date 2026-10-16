@@ -16,3 +16,20 @@ jobs:
       - run: uv run pytest -q        # unit, env check, CP-SAT, PPO smoke (no long training)
       - name: CLI smoke test
         run: uv run factory-scheduler benchmark --n-seeds 1 --scenarios stable --policies FIFO ATC --name ci_smoke
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t forgerl-dashboard .
+      - name: Start container and check health
+        run: |
+          docker run -d --name app -p 8501:8501 forgerl-dashboard
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" localhost:8501/_stcore/health || true)
+            [ "$code" = 200 ] && echo "healthy" && exit 0
+            sleep 3
+          done
+          docker logs app
+          exit 1
