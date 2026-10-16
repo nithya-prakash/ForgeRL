@@ -46,3 +46,45 @@ def paired_compare(df: pd.DataFrame, a: str, b: str, metric: str, scenario: str 
         "wilcoxon_p": p,
         "a_better_frac": float((diff < 0).mean()),
     }
+
+
+def holm_adjust(pvals: list[float]) -> list[float]:
+    """Holm-Bonferroni adjusted p-values (controls family-wise error across scenarios)."""
+    m = len(pvals)
+    order = sorted(range(m), key=lambda i: pvals[i])
+    adj, running = [0.0] * m, 0.0
+    for rank, i in enumerate(order):
+        running = max(running, (m - rank) * pvals[i])
+        adj[i] = min(1.0, running)
+    return adj
+
+
+def reference_table(
+    df: pd.DataFrame, policy: str, reference: dict[str, str], metric: str = "weighted_tardiness"
+) -> pd.DataFrame:
+    """`policy` vs a per-scenario reference policy fixed in advance (not chosen on these data).
+
+    One row per scenario (paired over seeds, Holm-adjusted across scenarios) plus a pooled
+    row over all (scenario, seed) pairs, which treats instances as independent pairs.
+    """
+    rows = []
+    for sc, ref in reference.items():
+        rows.append(
+            {"scenario": sc, "reference": ref, **paired_compare(df, policy, ref, metric, sc)}
+        )
+    adj = holm_adjust([r["wilcoxon_p"] for r in rows])
+    for r, p in zip(rows, adj, strict=True):
+        r["wilcoxon_p_holm"] = p
+        base = df[(df.scenario == r["scenario"]) & (df.policy == r["reference"])][metric].mean()
+        r["pct_diff_vs_ref"] = 100 * r["mean_diff"] / base
+    ref_rows = pd.concat(
+        [
+            df[(df.scenario == sc) & (df.policy == ref)].assign(policy="REF")
+            for sc, ref in reference.items()
+        ]
+    )
+    pooled = paired_compare(pd.concat([df[df.policy == policy], ref_rows]), policy, "REF", metric)
+    pooled.update({"scenario": "ALL (pooled)", "reference": "per-scenario"})
+    pooled["wilcoxon_p"] = float("nan")  # pairs are not independent across seeds/scenarios: CI only
+    pooled["pct_diff_vs_ref"] = 100 * pooled["mean_diff"] / ref_rows[metric].mean()
+    return pd.DataFrame(rows + [pooled])

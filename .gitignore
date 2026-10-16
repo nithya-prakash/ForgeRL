@@ -16,3 +16,5 @@ data/generated/*
 mlartifacts/
 data/results/ci_smoke*
 data/results/cleancheck*
+
+!models/*.zip

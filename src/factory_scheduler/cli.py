@@ -50,9 +50,7 @@ def cmd_compare(a: argparse.Namespace) -> None:
     """All heuristics + PPO (+ rolling CP-SAT) on the held-out test split; paired stats."""
     import json
 
-    import pandas as pd
-
-    from factory_scheduler.evaluation.stats import paired_compare
+    from factory_scheduler.evaluation.stats import reference_table
     from factory_scheduler.rl.policy import PPOPolicy
 
     scen_all = load_scenarios()
@@ -63,7 +61,9 @@ def cmd_compare(a: argparse.Namespace) -> None:
     if a.rolling:
         from factory_scheduler.optimization.cpsat import RollingCPSAT
 
-        pols.append(RollingCPSAT(time_limit=a.rolling_time_limit))
+        pols.append(
+            RollingCPSAT(time_limit=a.rolling_time_limit, deterministic_time=a.rolling_det_time)
+        )
     t0 = time.perf_counter()
     df = run_grid(pols, scen, seeds, "test", schedule_dir=RESULTS / "schedules")
     save_results(
@@ -78,36 +78,26 @@ def cmd_compare(a: argparse.Namespace) -> None:
             "seconds": time.perf_counter() - t0,
         },
     )
-    heur = [p for p in HEURISTICS]
-    best = {
-        sc: min(
-            heur, key=lambda p: df[(df.scenario == sc) & (df.policy == p)].weighted_tardiness.mean()
+    if a.reference == "val":  # reference rule chosen on validation seeds, never on test data
+        vdf = run_grid(
+            [get_policy(p) for p in HEURISTICS], scen, split_seeds("val", a.n_seeds), "val"
         )
-        for sc in scen
-    }
-    rows = []
-    for sc in scen:
-        r = paired_compare(df, "PPO", best[sc], "weighted_tardiness", sc)
-        rows.append({"scenario": sc, "strongest_heuristic": best[sc], **r})
-    tab = pd.DataFrame(rows)
-    tab.to_csv(RESULTS / f"{a.name}_ppo_vs_best.csv", index=False)
+        vmeans = vdf.groupby(["scenario", "policy"]).weighted_tardiness.mean()
+        ref = {sc: str(vmeans.loc[sc].idxmin()) for sc in scen}
+        vdf.to_csv(RESULTS / f"{a.name}_reference_selection_val.csv", index=False)
+    else:  # legacy behaviour (selection on the test data itself; favours the rule)
+        tm = (
+            df[df.policy.isin(HEURISTICS)].groupby(["scenario", "policy"]).weighted_tardiness.mean()
+        )
+        ref = {sc: str(tm.loc[sc].idxmin()) for sc in scen}
+    tab = reference_table(df, "PPO", ref)
+    tab.to_csv(RESULTS / f"{a.name}_ppo_vs_ref.csv", index=False)
+    cols = ["scenario", "reference", "n", "mean_diff", "pct_diff_vs_ref", "ci95_low", "ci95_high"]
+    print(tab[cols + ["wilcoxon_p", "wilcoxon_p_holm"]].round(4).to_string(index=False))
     print(
-        tab[
-            [
-                "scenario",
-                "strongest_heuristic",
-                "n",
-                "mean_diff",
-                "ci95_low",
-                "ci95_high",
-                "wilcoxon_p",
-                "a_better_frac",
-            ]
-        ]
-        .round(2)
-        .to_string(index=False)
+        "(mean_diff < 0 => PPO better than the reference rule, which was chosen on "
+        f"{a.reference} seeds)"
     )
-    print("(mean_diff < 0 => PPO has lower weighted tardiness than the strongest heuristic)")
     print(json.dumps({"saved": str(RESULTS / f"{a.name}.csv")}))
 
 
@@ -195,8 +185,15 @@ def main(argv: list[str] | None = None) -> None:
     c.add_argument("--model", default=str(ROOT / "artifacts/models/ppo_default/best.zip"))
     c.add_argument("--n-seeds", type=int, default=20)
     c.add_argument("--scenarios", nargs="*")
+    c.add_argument("--reference", choices=["val", "test"], default="val")
     c.add_argument("--rolling", action="store_true")
     c.add_argument("--rolling-time-limit", type=float, default=0.3)
+    c.add_argument(
+        "--rolling-det-time",
+        type=float,
+        default=None,
+        help="CP-SAT deterministic-time budget per solve (machine independent)",
+    )
     c.set_defaults(fn=cmd_compare)
     q = sub.add_parser("cpsat", help="offline CP-SAT vs heuristics on small static variants")
     q.add_argument("--name", default="cpsat")

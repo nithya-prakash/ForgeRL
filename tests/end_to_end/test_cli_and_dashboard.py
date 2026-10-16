@@ -70,3 +70,35 @@ def test_experiment_page_survives_empty_mlflow_db(tmp_path, monkeypatch):
     at.run()
     at.sidebar.radio[0].set_value("Experiment Tracking").run()
     assert not at.exception
+
+
+def test_policy_page_shows_reference_table_from_saved_csv(tmp_path, monkeypatch):
+    seeds = list(range(200000, 200006))
+    rows = [
+        {
+            "policy": p,
+            "scenario": sc,
+            "seed": s,
+            "weighted_tardiness": base + 10 * i + s % 7,
+            "mean_flow_time": 1.0,
+            "makespan": 1.0,
+            "on_time_pct": 50.0,
+            "n_unfinished": 0,
+        }
+        for sc in ("stable", "stress")
+        for i, (p, base) in enumerate((("ATC", 100), ("PPO", 140)))
+        for s in seeds
+    ]
+    pd.DataFrame(rows).to_csv(tmp_path / "compare.csv", index=False)
+    from factory_scheduler.evaluation.stats import reference_table
+
+    reference_table(pd.DataFrame(rows), "PPO", {"stable": "ATC", "stress": "ATC"}).to_csv(
+        tmp_path / "compare_ppo_vs_ref.csv", index=False
+    )
+    monkeypatch.setenv("FACTORY_RESULTS_DIR", str(tmp_path))
+    at = AppTest.from_file(app_mod.__file__, default_timeout=90)
+    at.run()
+    at.sidebar.radio[0].set_value("Policy Comparison").run()
+    assert not at.exception
+    tables = [t.value for t in at.dataframe if "wilcoxon_p_holm" in t.value.columns]
+    assert len(tables) == 1 and list(tables[0].scenario) == ["stable", "stress", "ALL (pooled)"]

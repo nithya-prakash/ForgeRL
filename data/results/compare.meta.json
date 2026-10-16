@@ -193,7 +193,7 @@
     200018,
     200019
   ],
-  "model": "artifacts/models/ppo_1m_tardy/best.zip",
+  "model": "models/ppo_1m_tardy_best.zip",
   "policies": [
     "ATC",
     "CR",
@@ -203,5 +203,5 @@
     "PPO",
     "SPT"
   ],
-  "seconds": 7.968156791001093
+  "seconds": 20.416812125000433
 }

@@ -1,6 +1,6 @@
 # Why did PPO underperform ATC? (analysis, not a proof)
 
-Main result (test seeds, 100 instances): PPO 4250 vs ATC 3227 mean weighted tardiness; PPO is worse in all five scenarios. This note lists hypotheses, the evidence we actually have, and what would separate them. Everything below uses **validation** seeds (100000+) unless stated; test seeds were not touched by any diagnostic or experiment here.
+Main result (test seeds, 100 instances): PPO 4250 vs ATC 3227 mean weighted tardiness; PPO is worse in all five scenarios. This note lists hypotheses, the evidence we actually have, and what would separate them. Diagnostics and the decision rule use **validation** seeds (100000+). After the decision rule was applied, the cloned and fine-tuned models were also evaluated once on the test seeds for reporting only (section "Test-set check"); no choice depends on those numbers.
 
 ## Code audit of the RL setup (what is and is not a problem)
 | Item | Finding |
@@ -31,6 +31,17 @@ Main result (test seeds, 100 instances): PPO 4250 vs ATC 3227 mean weighted tard
 | clone of ATC | 3992 / 4209 / 4051 | 4084 | +200 [+24, +376], Wilcoxon p=0.077 |
 | PPO fine-tuned from clone | 4421 / 4487 / 4643 | 4517 | +633 [+249, +1017], p=4e-9 |
 | PPO from scratch (1M) | one run | 4980 | n/a |
+
+### Test-set check (reporting only; `scripts/rl_experiment_bc_test.py`)
+100 test instances (5 scenarios x 20 seeds), ATC = 3227, averaged over the 3 training seeds, paired vs ATC (pairs treated as independent):
+
+| policy | per-seed test mean | mean | vs ATC (95% CI, Wilcoxon p) |
+|---|---|---|---|
+| clone of ATC | 3409 / 3376 / 3437 | 3408 | +181 [+92, +270] (+5.6%), p = 1.8e-5 |
+| PPO fine-tuned from clone | 3531 / 3555 / 3750 | 3612 | +385 [+242, +528] (+11.9%), p = 4.9e-12 |
+| PPO from scratch (1M) | one run | 4250 | +1023 (+31.7%, pooled CI [747, 1299]) |
+
+The rebuilt clone reproduced the saved validation scores exactly (3991.6 / 4208.9 / 4051.3), so the cloning step is deterministic. On test, fine-tuning again moves away from ATC, though by less than on validation (+11.9% vs +16%), and even the pure clone is significantly worse than the rule it imitates.
 
 Caveats: val-based, 3 seeds, one reward setting for E2, the critic is untrained at the start of fine-tuning (a likely contributor to early drift), and the clone was not DAgger-corrected.
 

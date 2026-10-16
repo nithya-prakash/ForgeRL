@@ -170,19 +170,44 @@ elif page == "Policy Comparison":
     )
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(s.round(2), hide_index=True)
-    st.subheader("Paired comparison vs. strongest heuristic")
-    pb = load_csv("compare_ppo_vs_best", str(RESULTS))
+    st.subheader("PPO vs. reference rule (paired)")
+    pb = load_csv("compare_ppo_vs_ref", str(RESULTS))
     if pb is not None:
-        pb = pb.round(3).assign(wilcoxon_p=pb.wilcoxon_p.map("{:.1e}".format))
         st.caption(
-            "Per scenario, n = 20 matched test seeds; no multiple-comparison correction. "
-            "The strongest heuristic was chosen on the same test data (favours the heuristic)."
+            "Reference rule chosen on validation seeds. Per scenario: n = 20 matched test seeds, "
+            "Holm-adjusted across scenarios. The pooled row treats all pairs as independent "
+            "(CI only, no p-value). Positive diff = PPO worse (higher tardiness)."
         )
-        st.dataframe(pb, hide_index=True)
+        cols = [
+            "scenario",
+            "reference",
+            "n",
+            "mean_diff",
+            "pct_diff_vs_ref",
+            "ci95_low",
+            "ci95_high",
+            "wilcoxon_p",
+            "wilcoxon_p_holm",
+        ]
+        show = pb[cols].copy()
+        for col in ("wilcoxon_p", "wilcoxon_p_holm"):
+            show[col] = show[col].map(lambda v: "n/a" if pd.isna(v) else f"{v:.1e}")
+        st.dataframe(show.round(2), hide_index=True)
+    else:
+        legacy = load_csv("compare_ppo_vs_best", str(RESULTS))
+        if legacy is not None:
+            st.caption(
+                "Legacy table: reference chosen on the test data (favours the rule), "
+                "no multiple-comparison correction."
+            )
+            st.dataframe(legacy.round(3), hide_index=True)
     a, b = st.columns(2)
     pa = a.selectbox("Policy A", sorted(d.policy.unique()), index=0)
     pbn = b.selectbox("Policy B", sorted(d.policy.unique()), index=1)
-    st.caption("Pooled over all selected scenarios and seeds (seeds treated as independent pairs).")
+    st.caption(
+        "Pooled over all selected scenarios and seeds (pairs treated as independent; "
+        "the p-value is uncorrected and descriptive only)."
+    )
     if pa != pbn:
         st.json(paired_compare(d, pa, pbn, metric))
     cp = load_csv("cpsat", str(RESULTS))

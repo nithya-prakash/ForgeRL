@@ -48,6 +48,7 @@ def solve_jobs(
     time_limit: float = 10.0,
     seed: int = 0,
     workers: int = 1,
+    deterministic_time: float | None = None,
 ) -> Solution:
     """Min makespan or min priority-weighted tardiness for the not-yet-started operations.
 
@@ -105,6 +106,9 @@ def solve_jobs(
 
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = time_limit
+    if deterministic_time is not None:  # machine-independent budget => reproducible solves
+        solver.parameters.max_deterministic_time = deterministic_time
+        solver.parameters.max_time_in_seconds = 1e9
     solver.parameters.num_workers = workers
     solver.parameters.random_seed = seed
     t0 = time.perf_counter()
@@ -173,10 +177,12 @@ class RollingCPSAT:
         objective: str = "weighted_tardiness",
         repair_estimate: int = 10,
         seed: int = 0,
+        deterministic_time: float | None = None,
     ):
         self.name = "CPSAT-RH"
         self.time_limit, self.objective = time_limit, objective
         self.repair_estimate, self.seed = repair_estimate, seed
+        self.deterministic_time = deterministic_time
         self.statuses: list[str] = []
 
     def select(self, sim: FactorySim, candidates: list[Candidate]) -> int:
@@ -196,7 +202,16 @@ class RollingCPSAT:
                 first_op[jid], ready_at[jid] = cur.index, sim.now
             jobs.append(job)
         free = {m: sim.machine_free_at(m, self.repair_estimate) for m in sim.machine_ids}
-        sol = solve_jobs(jobs, first_op, ready_at, free, self.objective, self.time_limit, self.seed)
+        sol = solve_jobs(
+            jobs,
+            first_op,
+            ready_at,
+            free,
+            self.objective,
+            self.time_limit,
+            self.seed,
+            deterministic_time=self.deterministic_time,
+        )
         self.statuses.append(sol.status)
 
         def rank(i: int) -> tuple:

@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 RUN pip install --no-cache-dir uv
 WORKDIR /app
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml uv.lock README.md LICENSE ./
 # dependencies first so source edits do not invalidate the heavy layer (CPU-only torch on Linux)
 RUN uv sync --frozen --no-dev --no-install-project
 COPY src ./src
